@@ -11,7 +11,7 @@ document.querySelector('#register-form').addEventListener('submit', async (event
   feedback.textContent = '';
 
   try {
-    await api('/api/register', { method: 'POST', body: JSON.stringify(data) });
+    await api('/api/travelers', { method: 'POST', body: JSON.stringify(data) });
     window.location.href = '/';
   } catch (error) {
     feedback.textContent = error.message;

@@ -24,7 +24,7 @@ export async function updateAccountNav() {
   nav.innerHTML = `<strong>${escapeHtml(user.username)}</strong><a href="#" id="logout">Sign out</a>`;
   document.querySelector('#logout').addEventListener('click', async (event) => {
     event.preventDefault();
-    await api('/api/logout', { method: 'POST' });
+    await api('/api/session', { method: 'DELETE' });
     window.location.href = '/';
   });
   return user;

@@ -32,9 +32,9 @@ function renderBookingPage(train, user) {
 function trainSummary(train) {
   return `<article class="card ticket">
     <strong class="train-number">${escapeHtml(train.trainNumber)}</strong>
-    <div><small>Departure time</small><b>${escapeHtml(train.departureTime)}</b><span>${escapeHtml(train.departureStation)} · ${escapeHtml(train.originCity)}</span></div>
+    <div><small>Departure time</small><b>${escapeHtml(train.departureTime)}</b><span>${escapeHtml(train.departureLocation)} · ${escapeHtml(train.origin)}</span></div>
     <div class="route-line"><span>${train.durationMinutes} min</span><i></i></div>
-    <div class="arrival"><small>Arrival time</small><b>${escapeHtml(train.arrivalTime)}</b><span>${escapeHtml(train.arrivalStation)} · ${escapeHtml(train.destinationCity)}</span></div>
+    <div class="arrival"><small>Arrival time</small><b>${escapeHtml(train.arrivalTime)}</b><span>${escapeHtml(train.arrivalLocation)} · ${escapeHtml(train.destination)}</span></div>
   </article>`;
 }
 

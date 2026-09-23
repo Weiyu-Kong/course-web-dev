@@ -7,7 +7,7 @@ document.querySelector('#login-form').addEventListener('submit', async (event) =
   const feedback = document.querySelector('#feedback');
   feedback.textContent = '';
   try {
-    await api('/api/login', { method: 'POST', body: JSON.stringify(data) });
+    await api('/api/sessions', { method: 'POST', body: JSON.stringify(data) });
     window.location.href = '/';
   } catch (error) {
     feedback.textContent = error.message;

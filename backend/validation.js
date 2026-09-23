@@ -12,18 +12,18 @@ function text(value) {
 
 function validateSearch(input) {
   const data = {
-    from: text(input.from),
-    to: text(input.to),
+    origin: text(input.origin),
+    destination: text(input.destination),
     date: text(input.date),
   };
-  if (!data.from) throw new HttpError(400, 'From is required.', 'FROM_REQUIRED');
-  if (!data.to) throw new HttpError(400, 'To is required.', 'TO_REQUIRED');
+  if (!data.origin) throw new HttpError(400, 'Origin is required.', 'ORIGIN_REQUIRED');
+  if (!data.destination) throw new HttpError(400, 'Destination is required.', 'DESTINATION_REQUIRED');
   if (!data.date) throw new HttpError(400, 'Date is required.', 'DATE_REQUIRED');
-  if (data.from.toLowerCase() === data.to.toLowerCase()) {
-    throw new HttpError(400, 'From and To must be different cities.', 'SAME_CITY');
+  if (data.origin.toLowerCase() === data.destination.toLowerCase()) {
+    throw new HttpError(400, 'Origin and destination must be different.', 'SAME_CITY');
   }
-  if (data.date.toLowerCase() !== 'sun, may 31') {
-    throw new HttpError(400, 'Select a published date: Sun, May 31.', 'INVALID_DATE');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+    throw new HttpError(400, 'Date must use YYYY-MM-DD format.', 'INVALID_DATE');
   }
   return data;
 }
