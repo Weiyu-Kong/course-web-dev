@@ -3,6 +3,7 @@ const data = require('./db-access');
 const {
   HttpError,
   validateSearch,
+  validateServiceDate,
   validateRegistration,
   validateLogin,
   validateBooking,
@@ -21,6 +22,10 @@ async function searchTrains(req, res, next) {
     // 1. Read parameters from the request.
     const criteria = validateSearch(req.query);
 
+    if (!await data.hasPublishedServiceDate(criteria.date)) {
+      throw new HttpError(400, 'Select a published service date.', 'UNPUBLISHED_DATE');
+    }
+
     // 2. Ask the DB Access function for matching trains.
     const trains = await data.findTrains(
       criteria.origin,
@@ -37,7 +42,12 @@ async function searchTrains(req, res, next) {
 
 async function getTrain(req, res, next) {
   try {
-    const train = await data.findTrainById(req.params.id);
+    const trainId = Number(req.params.id);
+    if (!Number.isInteger(trainId) || trainId < 1) {
+      throw new HttpError(404, 'The selected train is unavailable.', 'TRAIN_NOT_FOUND');
+    }
+    const serviceDate = req.query.date === undefined ? null : validateServiceDate(req.query.date);
+    const train = await data.findTrainById(trainId, serviceDate);
     if (!train) throw new HttpError(404, 'The selected train is unavailable.', 'TRAIN_NOT_FOUND');
     res.json({ train });
   } catch (error) {
@@ -106,7 +116,7 @@ async function createBooking(req, res, next) {
     const existing = await data.findBookingByKey(req.traveler.id, booking.idempotencyKey);
     let bookingNo = existing?.booking_no;
     if (!bookingNo) {
-      bookingNo = `RB${Date.now().toString(36).toUpperCase()}${crypto.randomInt(100, 999)}`;
+      bookingNo = `RB${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
       try {
         await data.createBooking({ ...booking, bookingNo, passengerId: req.traveler.id });
       } catch (error) {

@@ -17,7 +17,7 @@ async function searchTrains(event) {
     results.innerHTML = `
       <div class="section-heading">
         <div><span>STEP 2</span><h2>${escapeHtml(data.criteria.origin)} → ${escapeHtml(data.criteria.destination)}</h2></div>
-        <p>${data.count} results · ${escapeHtml(data.criteria.date)}</p>
+        <p>${data.count} ${data.count === 1 ? 'result' : 'results'} · ${escapeHtml(data.trains[0]?.displayDate || data.criteria.date)}</p>
       </div>
       ${data.count ? data.trains.map(trainCard).join('') : '<div class="empty">No published trains match this search.</div>'}
     `;
@@ -33,6 +33,6 @@ function trainCard(train) {
     <div><small>Departure time</small><b>${escapeHtml(train.departureTime)}</b><span>${escapeHtml(train.departureLocation)}</span></div>
     <div class="route-line"><span>${train.durationMinutes} min</span><i></i></div>
     <div class="arrival"><small>Arrival time</small><b>${escapeHtml(train.arrivalTime)}</b><span>${escapeHtml(train.arrivalLocation)}</span></div>
-    <a class="button dark" href="/booking.html?trainId=${train.id}" aria-label="Book ${escapeHtml(train.trainNumber)}">Book</a>
+    <a class="button dark" href="/booking.html?trainId=${train.id}&amp;date=${encodeURIComponent(train.serviceDate)}" aria-label="Book train ${escapeHtml(train.trainNumber)}">Book</a>
   </article>`;
 }

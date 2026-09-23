@@ -21,26 +21,26 @@
       <fieldset>
         <legend><span>01</span> Traveler details</legend>
         <div class="form-grid">
-          <label>Nationality<select name="nationality"><option value="">Please select</option><option>Vietnam</option><option>China</option><option>Singapore</option><option>Other</option></select></label>
-          <label>Name<input name="name" autocomplete="name"></label>
-          <label>Passport number<input name="passportNumber"></label>
-          <label>Passport expiration date<input name="passportExpirationDate" type="date"></label>
-          <label>Date of birth<input name="dateOfBirth" type="date"></label>
-          <fieldset class="gender-group"><legend>Gender</legend><label><input type="radio" name="gender" value="Male"> Male</label><label><input type="radio" name="gender" value="Female"> Female</label></fieldset>
+          <label>Nationality<select name="nationality" required><option value="">Please select</option><option>Vietnam</option><option>China</option><option>Singapore</option><option>Other</option></select></label>
+          <label>Name<input name="name" required maxlength="100" autocomplete="name"></label>
+          <label>Passport number<input name="passportNumber" required minlength="6" maxlength="30" pattern="[A-Za-z0-9-]+"></label>
+          <label>Passport expiration date<input name="passportExpirationDate" type="date" required></label>
+          <label>Date of birth<input name="dateOfBirth" type="date" required></label>
+          <fieldset class="gender-group"><legend>Gender</legend><label><input type="radio" name="gender" value="Male" required> Male</label><label><input type="radio" name="gender" value="Female"> Female</label></fieldset>
         </div>
       </fieldset>
 
       <fieldset>
         <legend><span>02</span> Account details</legend>
         <div class="form-grid">
-          <label>Username<input name="username" autocomplete="username"></label>
-          <label>Email address<input name="email" type="email" autocomplete="email"></label>
-          <label>Password<input name="password" type="password" autocomplete="new-password"></label>
-          <label>Confirm password<input name="confirmPassword" type="password" autocomplete="new-password"></label>
+          <label>Username<input name="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_-]+" autocomplete="username"></label>
+          <label>Email address<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+          <label>Password<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password"></label>
+          <label>Confirm password<input name="confirmPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password"></label>
         </div>
       </fieldset>
 
-      <label class="checkbox-row"><input type="checkbox" name="acceptTerms"> I agree to the Terms of service and Privacy policy.</label>
+      <label class="checkbox-row"><input type="checkbox" name="acceptTerms" required> I agree to the Terms of service and Privacy policy.</label>
       <p id="feedback" class="feedback" role="alert"></p>
       <button class="button primary full" type="submit">Next step</button>
     </form>

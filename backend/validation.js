@@ -10,6 +10,17 @@ function text(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function parseIsoDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.valueOf()) || date.toISOString().slice(0, 10) !== value) return null;
+  return date;
+}
+
+function nonWhitespaceLength(value) {
+  return value.replace(/\s/g, '').length;
+}
+
 function validateSearch(input) {
   const data = {
     origin: text(input.origin),
@@ -22,10 +33,18 @@ function validateSearch(input) {
   if (data.origin.toLowerCase() === data.destination.toLowerCase()) {
     throw new HttpError(400, 'Origin and destination must be different.', 'SAME_CITY');
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+  if (!parseIsoDate(data.date)) {
     throw new HttpError(400, 'Date must use YYYY-MM-DD format.', 'INVALID_DATE');
   }
   return data;
+}
+
+function validateServiceDate(value) {
+  const date = text(value);
+  if (!parseIsoDate(date)) {
+    throw new HttpError(400, 'Date must use YYYY-MM-DD format.', 'INVALID_DATE');
+  }
+  return date;
 }
 
 function validateRegistration(input) {
@@ -43,9 +62,11 @@ function validateRegistration(input) {
     acceptTerms: input.acceptTerms === true,
   };
 
-  if (!data.nationality) throw new HttpError(400, 'Nationality is required.');
-  if (data.name.length < 2 || data.name.length > 100) {
-    throw new HttpError(400, 'Name must contain 2 to 100 characters.', 'INVALID_NAME');
+  if (nonWhitespaceLength(data.nationality) < 2 || data.nationality.length > 60) {
+    throw new HttpError(400, 'Nationality must contain 2 to 60 visible characters.', 'INVALID_NATIONALITY');
+  }
+  if (nonWhitespaceLength(data.name) < 2 || data.name.length > 100) {
+    throw new HttpError(400, 'Name must contain 2 to 100 non-whitespace characters.', 'INVALID_NAME');
   }
   if (!data.passportNumber) throw new HttpError(400, 'Passport number is required.');
   if (!/^[A-Za-z0-9-]{6,30}$/.test(data.passportNumber)) {
@@ -53,12 +74,13 @@ function validateRegistration(input) {
   }
 
   const today = new Date();
-  const birthDate = new Date(`${data.dateOfBirth}T00:00:00Z`);
-  const expirationDate = new Date(`${data.passportExpirationDate}T00:00:00Z`);
-  if (!data.dateOfBirth || Number.isNaN(birthDate.valueOf()) || birthDate >= today) {
+  const todayUtc = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const birthDate = parseIsoDate(data.dateOfBirth);
+  const expirationDate = parseIsoDate(data.passportExpirationDate);
+  if (!birthDate || birthDate >= todayUtc) {
     throw new HttpError(400, 'Date of birth must be in the past.');
   }
-  if (!data.passportExpirationDate || Number.isNaN(expirationDate.valueOf()) || expirationDate <= today) {
+  if (!expirationDate || expirationDate <= todayUtc) {
     throw new HttpError(400, 'Passport expiration date must be in the future.');
   }
   if (!['Male', 'Female'].includes(data.gender)) {
@@ -102,14 +124,14 @@ function validateBooking(input) {
   };
   if (!Number.isInteger(data.trainId)) throw new HttpError(400, 'Select a valid train.');
   if (!data.passengerName) throw new HttpError(400, 'Passenger name is required.');
-  if (data.passengerName.length < 2 || data.passengerName.length > 100) {
-    throw new HttpError(400, 'Passenger name must contain at least 2 characters.');
+  if (nonWhitespaceLength(data.passengerName) < 2 || data.passengerName.length > 100) {
+    throw new HttpError(400, 'Passenger name must contain 2 to 100 non-whitespace characters.');
   }
   if (!/^[A-Za-z0-9-]{6,30}$/.test(data.idNumber)) {
-    throw new HttpError(400, 'ID number must contain at least 6 letters, digits, or hyphens.');
+    throw new HttpError(400, 'ID number must contain 6 to 30 letters, digits, or hyphens.');
   }
-  if (data.nationality.length < 2 || data.nationality.length > 60) {
-    throw new HttpError(400, 'Nationality is required.');
+  if (nonWhitespaceLength(data.nationality) < 2 || data.nationality.length > 60) {
+    throw new HttpError(400, 'Nationality must contain 2 to 60 visible characters.');
   }
   const classes = ['standing ticket', 'Second Class', 'First Class', 'Business Class'];
   if (!classes.includes(data.ticketClass)) throw new HttpError(400, 'Select a valid ticket class.');
@@ -126,6 +148,7 @@ function validateBooking(input) {
 module.exports = {
   HttpError,
   validateSearch,
+  validateServiceDate,
   validateRegistration,
   validateLogin,
   validateBooking,

@@ -40,10 +40,20 @@ async function findTrains(origin, destination, date) {
   return rows.map(mapTrain);
 }
 
-async function findTrainById(id) {
+async function hasPublishedServiceDate(date) {
   const [rows] = await db.execute(
-    'SELECT * FROM Train WHERE id = ? AND is_bookable = TRUE',
-    [id],
+    'SELECT 1 FROM Train WHERE service_date = ? AND is_bookable = TRUE LIMIT 1',
+    [date],
+  );
+  return rows.length > 0;
+}
+
+async function findTrainById(id, serviceDate = null) {
+  const [rows] = await db.execute(
+    `SELECT * FROM Train
+     WHERE id = ? AND is_bookable = TRUE
+       AND (? IS NULL OR service_date = ?)`,
+    [id, serviceDate, serviceDate],
   );
   return mapTrain(rows[0]);
 }
@@ -64,7 +74,7 @@ async function createTraveler(traveler) {
 async function findTravelerByIdentifier(identifier) {
   const [rows] = await db.execute(
     `SELECT * FROM Traveler
-     WHERE username = ? OR LOWER(email) = LOWER(?)
+     WHERE BINARY username = BINARY ? OR LOWER(email) = LOWER(?)
      LIMIT 1`,
     [identifier, identifier],
   );
@@ -144,6 +154,7 @@ async function checkConnection() {
 
 module.exports = {
   findTrains,
+  hasPublishedServiceDate,
   findTrainById,
   createTraveler,
   findTravelerByIdentifier,

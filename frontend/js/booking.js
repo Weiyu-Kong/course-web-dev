@@ -12,8 +12,9 @@ async function start() {
     if (bookingNumber) return showCompletedBooking(user, bookingNumber);
 
     const trainId = params.get('trainId');
-    if (!trainId) throw new Error('Select a train from the search page.');
-    const { train } = await api(`/api/trains/${encodeURIComponent(trainId)}`);
+    const serviceDate = params.get('date');
+    if (!trainId || !serviceDate) throw new Error('Select an available train from the search results.');
+    const { train } = await api(`/api/trains/${encodeURIComponent(trainId)}?date=${encodeURIComponent(serviceDate)}`);
     renderBookingPage(train, user);
   } catch (error) {
     content.innerHTML = messageCard(error.message);
@@ -31,7 +32,7 @@ function renderBookingPage(train, user) {
 
 function trainSummary(train) {
   return `<article class="card ticket">
-    <strong class="train-number">${escapeHtml(train.trainNumber)}</strong>
+    <div class="journey-id"><strong class="train-number">${escapeHtml(train.trainNumber)}</strong><span>${escapeHtml(train.displayDate)}</span></div>
     <div><small>Departure time</small><b>${escapeHtml(train.departureTime)}</b><span>${escapeHtml(train.departureLocation)} · ${escapeHtml(train.origin)}</span></div>
     <div class="route-line"><span>${train.durationMinutes} min</span><i></i></div>
     <div class="arrival"><small>Arrival time</small><b>${escapeHtml(train.arrivalTime)}</b><span>${escapeHtml(train.arrivalLocation)} · ${escapeHtml(train.destination)}</span></div>
@@ -42,12 +43,12 @@ function passengerForm(train) {
   return `<section class="card passenger-card">
     <div class="section-heading"><div><span>STEP 4</span><h2>Passenger information</h2></div></div>
     <form id="booking-form" class="booking-form" data-train-id="${train.id}" novalidate>
-      <label>Ticket class<select name="ticketClass"><option value="">Please select</option><option>standing ticket</option><option>Second Class</option><option>First Class</option><option>Business Class</option></select></label>
-      <label>Ticket type<select name="ticketType"><option value="">Please select</option><option>Adult</option><option>Child</option><option>Student</option></select></label>
-      <label>Name<input name="passengerName"></label>
-      <label>ID number<input name="idNumber"></label>
-      <label>Nationality<input name="nationality"></label>
-      <label class="checkbox-row"><input type="checkbox" name="acceptTerms"> I agree to the Terms of service.</label>
+      <label>Ticket class<select name="ticketClass" required><option value="">Please select</option><option>standing ticket</option><option>Second Class</option><option>First Class</option><option>Business Class</option></select></label>
+      <label>Ticket type<select name="ticketType" required><option value="">Please select</option><option>Adult</option><option>Child</option><option>Student</option></select></label>
+      <label>Passenger name<input name="passengerName" required maxlength="100" autocomplete="name"></label>
+      <label>ID number<input name="idNumber" required minlength="6" maxlength="30" pattern="[A-Za-z0-9-]+"></label>
+      <label>Nationality<input name="nationality" required minlength="2" maxlength="60" autocomplete="country-name"></label>
+      <label class="checkbox-row"><input type="checkbox" name="acceptTerms" required> I agree to the Terms of service.</label>
       <p id="feedback" class="feedback" role="alert"></p>
       <button class="button primary" type="submit">Place order</button>
     </form>
@@ -59,12 +60,16 @@ function reviewOrder(event, train) {
   const formData = new FormData(event.currentTarget);
   const data = Object.fromEntries(formData);
   data.acceptTerms = formData.has('acceptTerms');
+  data.passengerName = data.passengerName.trim();
+  data.idNumber = data.idNumber.trim();
+  data.nationality = data.nationality.trim();
   const validationMessage = validatePassenger(data);
   if (validationMessage) {
     document.querySelector('#feedback').textContent = validationMessage;
     return;
   }
 
+  const idempotencyKey = crypto.randomUUID();
   const dialog = document.createElement('dialog');
   dialog.innerHTML = `
     <h2>Please confirm the following information.</h2>
@@ -86,7 +91,7 @@ function reviewOrder(event, train) {
     try {
       const result = await api('/api/bookings', {
         method: 'POST',
-        body: JSON.stringify({ ...data, trainId: train.id, idempotencyKey: crypto.randomUUID() }),
+        body: JSON.stringify({ ...data, trainId: train.id, idempotencyKey }),
       });
       window.location.href = `/booking.html?bookingNumber=${encodeURIComponent(result.bookingNumber)}`;
     } catch (error) {
@@ -121,9 +126,11 @@ async function showCompletedBooking(user, bookingNumber) {
 
 function validatePassenger(data) {
   if (!data.passengerName?.trim()) return 'Passenger name is required.';
-  if (data.passengerName.trim().length < 2) return 'Passenger name must contain at least 2 characters.';
-  if (!/^[A-Za-z0-9-]{6,30}$/.test(data.idNumber?.trim() || '')) return 'ID number must contain at least 6 letters, digits, or hyphens.';
-  if (!data.nationality?.trim()) return 'Nationality is required.';
+  const visibleNameLength = data.passengerName.replace(/\s/g, '').length;
+  if (visibleNameLength < 2 || data.passengerName.length > 100) return 'Passenger name must contain 2 to 100 non-whitespace characters.';
+  if (!/^[A-Za-z0-9-]{6,30}$/.test(data.idNumber?.trim() || '')) return 'ID number must contain 6 to 30 letters, digits, or hyphens.';
+  const visibleNationalityLength = data.nationality.replace(/\s/g, '').length;
+  if (visibleNationalityLength < 2 || data.nationality.length > 60) return 'Nationality must contain 2 to 60 visible characters.';
   if (!data.ticketClass) return 'Select a ticket class.';
   if (!data.ticketType) return 'Select a ticket type.';
   if (!data.acceptTerms) return 'You must accept the Terms of service.';
@@ -131,5 +138,6 @@ function validatePassenger(data) {
 }
 
 function messageCard(message, showLinks = false) {
-  return `<section class="card message-card"><h2>${escapeHtml(message)}</h2>${showLinks ? '<p><a class="button primary" href="/login.html">Login</a> <a href="/register.html">Register</a></p>' : '<a href="/">Return home</a>'}</section>`;
+  const returnTo = `${window.location.pathname}${window.location.search}`;
+  return `<section class="card message-card"><h2>${escapeHtml(message)}</h2>${showLinks ? `<p><a class="button primary" href="/login.html?returnTo=${encodeURIComponent(returnTo)}">Login</a> <a href="/register.html">Register</a></p>` : '<a href="/">Return home</a>'}</section>`;
 }
