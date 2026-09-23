@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Railway 12306 · Search trains</title>
+  <!-- PPT frontend step 2: connect CSS after the HTML structure is clear. -->
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- PPT frontend step 3/4: add JavaScript, then connect the REST API. -->
+  <script type="module" src="/js/home.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="logo" aria-hidden="true">R</span>
+      <span><strong>RAILWAY 12306</strong><small>Teaching demo</small></span>
+    </a>
+    <nav id="account-nav" aria-label="Account">
+      <a href="/login.html">Login</a>
+      <a href="/register.html">Register</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="kicker">HIGH-SPEED RAIL · SIMPLE BOOKING</p>
+      <h1>Find your<br>next train.</h1>
+      <p>Search the published timetable, choose a service, and create a booking.</p>
+    </section>
+
+    <section class="card search-card" aria-labelledby="search-title">
+      <div class="section-heading">
+        <div><span>STEP 1</span><h2 id="search-title">Search trains</h2></div>
+        <p>Try the seeded Shanghai → Beijing route.</p>
+      </div>
+
+      <form id="search-form" novalidate>
+        <label>From<input name="from" value="Shanghai"></label>
+        <label>To<input name="to" value="Beijing"></label>
+        <label>Date<input name="date" value="Sun, May 31"></label>
+        <button class="button primary" type="submit">Search</button>
+      </form>
+      <p id="feedback" class="feedback" role="alert"></p>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
+  </main>
+
+  <footer>MySQL → Express REST API → HTML + CSS + JavaScript</footer>
+</body>
+</html>

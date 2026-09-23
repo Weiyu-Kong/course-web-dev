@@ -1,0 +1,20 @@
+{
+  "name": "railway-ticket-teaching-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A MySQL, Express and vanilla JavaScript teaching demo for train ticket booking.",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "node --watch backend/server.js",
+    "start": "node backend/server.js",
+    "db:init": "node backend/scripts/init-database.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.11.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

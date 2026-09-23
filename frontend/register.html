@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register · Railway 12306</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script type="module" src="/js/register.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="logo">R</span><span><strong>RAILWAY 12306</strong><small>Teaching demo</small></span></a>
+    <nav id="account-nav" aria-label="Account"><a href="/login.html">Login</a><a href="/register.html">Register</a></nav>
+  </header>
+
+  <main class="narrow-page">
+    <a class="back-link" href="/">← Home</a>
+    <div class="page-title"><p class="kicker">CREATE AN ACCOUNT</p><h1>Register</h1><p>Enter traveler details exactly as shown on the passport.</p></div>
+
+    <form id="register-form" class="card form-card" novalidate>
+      <fieldset>
+        <legend><span>01</span> Traveler details</legend>
+        <div class="form-grid">
+          <label>Nationality<select name="nationality"><option value="">Please select</option><option>Vietnam</option><option>China</option><option>Singapore</option><option>Other</option></select></label>
+          <label>Name<input name="name" autocomplete="name"></label>
+          <label>Passport number<input name="passportNumber"></label>
+          <label>Passport expiration date<input name="passportExpirationDate" type="date"></label>
+          <label>Date of birth<input name="dateOfBirth" type="date"></label>
+          <fieldset class="gender-group"><legend>Gender</legend><label><input type="radio" name="gender" value="Male"> Male</label><label><input type="radio" name="gender" value="Female"> Female</label></fieldset>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span>02</span> Account details</legend>
+        <div class="form-grid">
+          <label>Username<input name="username" autocomplete="username"></label>
+          <label>Email address<input name="email" type="email" autocomplete="email"></label>
+          <label>Password<input name="password" type="password" autocomplete="new-password"></label>
+          <label>Confirm password<input name="confirmPassword" type="password" autocomplete="new-password"></label>
+        </div>
+      </fieldset>
+
+      <label class="checkbox-row"><input type="checkbox" name="acceptTerms"> I agree to the Terms of service and Privacy policy.</label>
+      <p id="feedback" class="feedback" role="alert"></p>
+      <button class="button primary full" type="submit">Next step</button>
+    </form>
+  </main>
+  <footer>Registration: validate → hash password → INSERT user → create session</footer>
+</body>
+</html>

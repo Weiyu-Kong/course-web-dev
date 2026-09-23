@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login · Railway 12306</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script type="module" src="/js/login.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="logo">R</span><span><strong>RAILWAY 12306</strong><small>Teaching demo</small></span></a>
+    <nav id="account-nav" aria-label="Account"><a href="/login.html">Login</a><a href="/register.html">Register</a></nav>
+  </header>
+  <main class="login-page">
+    <form id="login-form" class="card form-card compact" novalidate>
+      <p class="kicker">WELCOME BACK</p><h1>Login</h1>
+      <label>Username or email<input name="identifier" autocomplete="username"></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password"></label>
+      <p id="feedback" class="feedback" role="alert"></p>
+      <button class="button primary full" type="submit">Login</button>
+      <p class="center">No account? <a href="/register.html">Register now</a></p>
+    </form>
+  </main>
+  <footer>Login with username or email</footer>
+</body>
+</html>
